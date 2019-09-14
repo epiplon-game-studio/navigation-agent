@@ -3,7 +3,6 @@ using UnityEngine.AI;
 
 public class NavigationAgent : MonoBehaviour
 {
-
     Vector3 _target;
     public Vector3 Target
     {
@@ -15,11 +14,17 @@ public class NavigationAgent : MonoBehaviour
         }
     }
 
-    [Header("Settings")]
-    public float Speed = 3f;
+    [HideInInspector] public float m_positionSpeed = 3f;
+    [HideInInspector] public bool axisX, axisY, axisZ;
+
+    [Header("ROTATION")]
+    public float m_rotationSpeed = 180f;
 
     NavMeshPath navMeshPath;
     int pathIndex = 0;
+    Vector3 m_direction;
+
+    // follow at axis
 
     void Start()
     {
@@ -30,13 +35,22 @@ public class NavigationAgent : MonoBehaviour
     {
         if (pathIndex < navMeshPath.corners.Length)
         {
-            transform.position = Vector3.MoveTowards(transform.position, navMeshPath.corners[pathIndex], Speed * Time.deltaTime);
+            var target = BuildAxisTarget(transform.position);
+            transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
 
-            if(transform.position == navMeshPath.corners[pathIndex])
+            if(transform.position == target)
             {
                 pathIndex++;
             }
+            else
+            {
+                // update the direction while on path
+                m_direction = (target - transform.position).normalized;
+            }
         }
+
+        if (m_direction != Vector3.zero)
+            RotateAgent();
     }
 
     public void CalculatePath()
@@ -45,6 +59,26 @@ public class NavigationAgent : MonoBehaviour
         {
             pathIndex = 0;
         }
+    }
+
+    /// <summary>
+    /// Build a target position based on which axis it will be updated
+    /// </summary>
+    /// <param name="origin">Original position of the agent</param>
+    /// <returns>The resulting target</returns>
+    Vector3 BuildAxisTarget(Vector3 origin)
+    {
+        Vector3 target = origin;
+        target.x = axisX ? navMeshPath.corners[pathIndex].x : origin.x;
+        target.y = axisY ? navMeshPath.corners[pathIndex].y : origin.y;
+        target.z = axisZ ? navMeshPath.corners[pathIndex].z : origin.z;
+        return target;
+    }
+
+    void RotateAgent()
+    {
+        var rotation = Quaternion.LookRotation(m_direction, Vector3.up);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, m_rotationSpeed * Time.deltaTime);
     }
 
     #region Debug
