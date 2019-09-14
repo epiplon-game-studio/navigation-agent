@@ -8,6 +8,7 @@ namespace vnc.AI.Editor
     {
         const float TOGGLE_WIDTH = 35f;
 
+        SerializedProperty isEnabled;
         SerializedProperty axisX, axisY, axisZ;
         SerializedProperty positionSpeed;
 
@@ -15,11 +16,12 @@ namespace vnc.AI.Editor
 
         private void OnEnable()
         {
+            isEnabled = serializedObject.FindProperty("m_enabled");
             axisX = serializedObject.FindProperty("axisX");
             axisY = serializedObject.FindProperty("axisY");
             axisZ = serializedObject.FindProperty("axisZ");
-
             positionSpeed = serializedObject.FindProperty("m_positionSpeed");
+
 
             debugStyle = new GUIStyle();
             var debugTexture = new Texture2D(1, 1);
@@ -30,6 +32,10 @@ namespace vnc.AI.Editor
 
         public override void OnInspectorGUI()
         {
+            EditorGUILayout.LabelField("GENERAL", EditorStyles.boldLabel);
+            isEnabled.boolValue = EditorGUILayout.Toggle("Enabled", isEnabled.boolValue);
+            EditorGUILayout.Separator();
+
             EditorGUILayout.LabelField("POSITION", EditorStyles.boldLabel);
             positionSpeed.floatValue = EditorGUILayout.FloatField("Speed", positionSpeed.floatValue);
             EditorGUI.BeginDisabledGroup(Application.isPlaying);

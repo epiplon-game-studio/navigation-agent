@@ -14,6 +14,8 @@ public class NavigationAgent : MonoBehaviour
         }
     }
 
+    [HideInInspector] public bool m_enabled;
+
     [HideInInspector] public float m_positionSpeed = 3f;
     [HideInInspector] public bool axisX, axisY, axisZ;
 
@@ -33,24 +35,29 @@ public class NavigationAgent : MonoBehaviour
 
     void Update()
     {
-        if (pathIndex < navMeshPath.corners.Length)
+        if (m_enabled)
         {
-            var target = BuildAxisTarget(transform.position);
-            transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+            if (pathIndex < navMeshPath.corners.Length)
+            {
+                var target = BuildAxisTarget(transform.position);
 
-            if(transform.position == target)
-            {
-                pathIndex++;
+                //TODO: update rigidbody?
+                transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+
+                if(transform.position == target)
+                {
+                    pathIndex++;
+                }
+                else
+                {
+                    // update the direction while on path
+                    m_direction = (target - transform.position).normalized;
+                }
             }
-            else
-            {
-                // update the direction while on path
-                m_direction = (target - transform.position).normalized;
-            }
+
+            if (m_direction != Vector3.zero)
+                RotateAgent();
         }
-
-        if (m_direction != Vector3.zero)
-            RotateAgent();
     }
 
     public void CalculatePath()
