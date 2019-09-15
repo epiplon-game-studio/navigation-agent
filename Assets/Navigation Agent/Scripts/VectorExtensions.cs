@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 
-public static class VectorExtensions {
+public static class VectorExtensions
+{
 
     public static Vector3 WithX(this Vector3 v, float x)
     {

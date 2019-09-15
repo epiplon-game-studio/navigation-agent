@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class NavigationAgent : MonoBehaviour
@@ -14,19 +15,28 @@ public class NavigationAgent : MonoBehaviour
         }
     }
 
-    [HideInInspector] public bool m_enabled;
+    public bool m_enabled;
 
-    [HideInInspector] public float m_positionSpeed = 3f;
-    [HideInInspector] public bool axisX, axisY, axisZ;
+    // POSITION
+    public float m_positionSpeed = 3f;
+    public bool axisX, axisY, axisZ;
 
-    [Header("ROTATION")]
+    // ROTATION
     public float m_rotationSpeed = 180f;
+    //public bool m_rotateWhenStopped = true;
+    public RotationStyle rotationStyle;
+
+    public bool IsStopped
+    {
+        get
+        {
+            return pathIndex == navMeshPath.corners.Length;
+        }
+    }
 
     NavMeshPath navMeshPath;
     int pathIndex = 0;
     Vector3 m_direction;
-
-    // follow at axis
 
     void Start()
     {
@@ -39,12 +49,23 @@ public class NavigationAgent : MonoBehaviour
         {
             if (pathIndex < navMeshPath.corners.Length)
             {
-                var target = BuildAxisTarget(transform.position);
+                var target = NextPosition();
 
                 //TODO: update rigidbody?
-                transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                if (rotationStyle == RotationStyle.RotateBeforeMoving)
+                {
+                    bool isFacingTarget = IsFacingTarget();
+                    if (isFacingTarget)
+                        transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
 
-                if(transform.position == target)
+                    Debug.Log("Facing target? " + isFacingTarget);
+                }
+                else
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                }
+
+                if (transform.position == target)
                 {
                     pathIndex++;
                 }
@@ -56,7 +77,19 @@ public class NavigationAgent : MonoBehaviour
             }
 
             if (m_direction != Vector3.zero)
-                RotateAgent();
+            {
+                switch (rotationStyle)
+                {
+                    case RotationStyle.RotateBeforeMoving:
+                    case RotationStyle.Always:
+                        RotateAgent();
+                        break;
+                    case RotationStyle.MovingOnly:
+                        if (!IsStopped)
+                            RotateAgent();
+                        break;
+                }
+            }
         }
     }
 
@@ -71,17 +104,29 @@ public class NavigationAgent : MonoBehaviour
     /// <summary>
     /// Build a target position based on which axis it will be updated
     /// </summary>
-    /// <param name="origin">Original position of the agent</param>
     /// <returns>The resulting target</returns>
-    Vector3 BuildAxisTarget(Vector3 origin)
+    public Vector3 NextPosition()
     {
-        Vector3 target = origin;
-        target.x = axisX ? navMeshPath.corners[pathIndex].x : origin.x;
-        target.y = axisY ? navMeshPath.corners[pathIndex].y : origin.y;
-        target.z = axisZ ? navMeshPath.corners[pathIndex].z : origin.z;
+        Vector3 target = transform.position;
+        target.x = axisX ? navMeshPath.corners[pathIndex].x : transform.position.x;
+        target.y = axisY ? navMeshPath.corners[pathIndex].y : transform.position.y;
+        target.z = axisZ ? navMeshPath.corners[pathIndex].z : transform.position.z;
         return target;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    public bool IsFacingTarget(int precisionDigits = 0)
+    {
+        // compare facing the target depending on selected using axis
+        bool faceX = axisX ? Math.Round(m_direction.x, precisionDigits) == Math.Round(transform.forward.x, precisionDigits) : true;
+        bool faceY = axisY ? Math.Round(m_direction.y, precisionDigits) == Math.Round(transform.forward.y, precisionDigits) : true;
+        bool faceZ = axisZ ? Math.Round(m_direction.z, precisionDigits) == Math.Round(transform.forward.z, precisionDigits) : true;
+        return faceX && faceY && faceZ;
+    }
+    
     void RotateAgent()
     {
         var rotation = Quaternion.LookRotation(m_direction, Vector3.up);
@@ -94,9 +139,7 @@ public class NavigationAgent : MonoBehaviour
         if (navMeshPath != null)
         {
             Rect r = new Rect(0, 0, 300, 300);
-            GUI.Label(r, "Path status: " + navMeshPath.status);
-            r.y += 30;
-            GUI.Label(r, "Corners: " + navMeshPath.corners.Length);
+            GUI.Label(r, "Facing Target: " + IsFacingTarget());
         }
     }
 
@@ -114,4 +157,13 @@ public class NavigationAgent : MonoBehaviour
         }
     }
     #endregion
+
+
+    public enum RotationStyle
+    {
+        Never,      // no rotation at all
+        Always,     // always
+        MovingOnly, // no rotation when stopped
+        RotateBeforeMoving
+    }
 }

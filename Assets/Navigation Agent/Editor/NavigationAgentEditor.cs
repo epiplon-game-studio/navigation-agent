@@ -10,7 +10,8 @@ namespace vnc.AI.Editor
 
         SerializedProperty isEnabled;
         SerializedProperty axisX, axisY, axisZ;
-        SerializedProperty positionSpeed;
+        SerializedProperty positionSpeed, rotationSpeed;
+        SerializedProperty rotationStyle;
 
         GUIStyle debugStyle;
 
@@ -21,7 +22,8 @@ namespace vnc.AI.Editor
             axisY = serializedObject.FindProperty("axisY");
             axisZ = serializedObject.FindProperty("axisZ");
             positionSpeed = serializedObject.FindProperty("m_positionSpeed");
-
+            rotationSpeed = serializedObject.FindProperty("m_rotationSpeed");
+            rotationStyle = serializedObject.FindProperty("rotationStyle");
 
             debugStyle = new GUIStyle();
             var debugTexture = new Texture2D(1, 1);
@@ -32,14 +34,16 @@ namespace vnc.AI.Editor
 
         public override void OnInspectorGUI()
         {
+            EditorGUILayout.Space();
             EditorGUILayout.LabelField("GENERAL", EditorStyles.boldLabel);
             isEnabled.boolValue = EditorGUILayout.Toggle("Enabled", isEnabled.boolValue);
-            EditorGUILayout.Separator();
+            EditorGUILayout.Space();
 
+            #region POSITION
             EditorGUILayout.LabelField("POSITION", EditorStyles.boldLabel);
-            positionSpeed.floatValue = EditorGUILayout.FloatField("Speed", positionSpeed.floatValue);
-            EditorGUI.BeginDisabledGroup(Application.isPlaying);
+            EditorGUILayout.PropertyField(positionSpeed);
 
+            EditorGUI.BeginDisabledGroup(Application.isPlaying);
             Rect horizontalRect = EditorGUILayout.GetControlRect();
             Rect prefixRect = new Rect(horizontalRect.x, horizontalRect.y, EditorGUIUtility.labelWidth - horizontalRect.x, EditorGUIUtility.singleLineHeight);
             EditorGUI.PrefixLabel(prefixRect, new GUIContent("Axis Aligned"));
@@ -52,9 +56,14 @@ namespace vnc.AI.Editor
             axisZ.boolValue = EditorGUI.ToggleLeft(toggleRect, "Z", axisZ.boolValue);
 
             EditorGUI.EndDisabledGroup();
-            EditorGUILayout.Separator();
+            EditorGUILayout.Space();
+            #endregion
 
-            base.OnInspectorGUI();
+            #region ROTATION
+            EditorGUILayout.LabelField("ROTATION", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(rotationSpeed);
+            EditorGUILayout.PropertyField(rotationStyle);
+            #endregion
 
             serializedObject.ApplyModifiedProperties();
         }
