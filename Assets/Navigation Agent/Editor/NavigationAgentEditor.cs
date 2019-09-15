@@ -13,6 +13,7 @@ namespace vnc.AI.Editor
         SerializedProperty positionSpeed, rotationSpeed;
         SerializedProperty rotationStyle;
         SerializedProperty rotationPrecision;
+        SerializedProperty repathDelay;
 
         static bool advancedOptions;
 
@@ -28,7 +29,8 @@ namespace vnc.AI.Editor
             rotationSpeed = serializedObject.FindProperty("m_rotationSpeed");
             rotationStyle = serializedObject.FindProperty("rotationStyle");
             rotationPrecision = serializedObject.FindProperty("rotationPrecision");
-            
+            repathDelay = serializedObject.FindProperty("repathDelay");
+
             debugStyle = new GUIStyle();
             var debugTexture = new Texture2D(1, 1);
             debugTexture.SetPixel(0, 0, Color.red);
@@ -73,6 +75,11 @@ namespace vnc.AI.Editor
             if (advancedOptions)
             {
                 EditorGUI.PropertyField(FoldRect(), rotationPrecision);
+
+                var repathContent = new GUIContent("Repath Delay (seconds)", "Value in seconds");
+                repathDelay.floatValue = EditorGUI.Slider(FoldRect(), repathContent, repathDelay.floatValue, 0.01f, 9f);
+
+                EditorGUILayout.Space();
             }
 
             serializedObject.ApplyModifiedProperties();

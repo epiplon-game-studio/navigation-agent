@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -24,7 +26,10 @@ public class NavigationAgent : MonoBehaviour
     // ROTATION
     public float m_rotationSpeed = 180f;
     public RotationStyle rotationStyle;
+
+    // ADVANCED
     public RotationPrecision rotationPrecision = RotationPrecision.High;
+    public float repathDelay = 0.1f;
 
     public bool IsStopped
     {
@@ -41,6 +46,8 @@ public class NavigationAgent : MonoBehaviour
     void Start()
     {
         navMeshPath = new NavMeshPath();
+        _target = transform.position;
+        StartCoroutine(AutoRepath());
     }
 
     void Update()
@@ -91,6 +98,15 @@ public class NavigationAgent : MonoBehaviour
         }
     }
 
+    IEnumerator AutoRepath()
+    {
+        while (true)
+        {
+            CalculatePath();
+            yield return new WaitForSecondsRealtime(repathDelay);
+        }
+    }
+
     public void CalculatePath()
     {
         if (NavMesh.CalculatePath(transform.position, Target, NavMesh.AllAreas, navMeshPath))
@@ -130,6 +146,11 @@ public class NavigationAgent : MonoBehaviour
     {
         var rotation = Quaternion.LookRotation(m_direction, Vector3.up);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, m_rotationSpeed * Time.deltaTime);
+    }
+
+    private void OnDestroy()
+    {
+        StopCoroutine(AutoRepath());
     }
 
     #region Debug
