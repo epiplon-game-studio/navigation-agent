@@ -12,6 +12,9 @@ namespace vnc.AI.Editor
         SerializedProperty axisX, axisY, axisZ;
         SerializedProperty positionSpeed, rotationSpeed;
         SerializedProperty rotationStyle;
+        SerializedProperty rotationPrecision;
+
+        static bool advancedOptions;
 
         GUIStyle debugStyle;
 
@@ -24,7 +27,8 @@ namespace vnc.AI.Editor
             positionSpeed = serializedObject.FindProperty("m_positionSpeed");
             rotationSpeed = serializedObject.FindProperty("m_rotationSpeed");
             rotationStyle = serializedObject.FindProperty("rotationStyle");
-
+            rotationPrecision = serializedObject.FindProperty("rotationPrecision");
+            
             debugStyle = new GUIStyle();
             var debugTexture = new Texture2D(1, 1);
             debugTexture.SetPixel(0, 0, Color.red);
@@ -65,7 +69,23 @@ namespace vnc.AI.Editor
             EditorGUILayout.PropertyField(rotationStyle);
             #endregion
 
+            advancedOptions = EditorGUILayout.Foldout(advancedOptions, "Advanced");
+            if (advancedOptions)
+            {
+                EditorGUI.PropertyField(FoldRect(), rotationPrecision);
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
+
+        #region Utils
+        Rect FoldRect()
+        {
+            Rect r = EditorGUILayout.GetControlRect();
+            r.x += 10f;
+            r.width -= 10f;
+            return r;
+        }
+        #endregion
     }
 }

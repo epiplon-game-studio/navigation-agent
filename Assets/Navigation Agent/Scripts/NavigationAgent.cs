@@ -23,8 +23,8 @@ public class NavigationAgent : MonoBehaviour
 
     // ROTATION
     public float m_rotationSpeed = 180f;
-    //public bool m_rotateWhenStopped = true;
     public RotationStyle rotationStyle;
+    public RotationPrecision rotationPrecision = RotationPrecision.High;
 
     public bool IsStopped
     {
@@ -57,8 +57,6 @@ public class NavigationAgent : MonoBehaviour
                     bool isFacingTarget = IsFacingTarget();
                     if (isFacingTarget)
                         transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
-
-                    Debug.Log("Facing target? " + isFacingTarget);
                 }
                 else
                 {
@@ -118,15 +116,16 @@ public class NavigationAgent : MonoBehaviour
     /// 
     /// </summary>
     /// <returns></returns>
-    public bool IsFacingTarget(int precisionDigits = 0)
+    public bool IsFacingTarget()
     {
+        int precisionDigits = (int)rotationPrecision;
         // compare facing the target depending on selected using axis
         bool faceX = axisX ? Math.Round(m_direction.x, precisionDigits) == Math.Round(transform.forward.x, precisionDigits) : true;
         bool faceY = axisY ? Math.Round(m_direction.y, precisionDigits) == Math.Round(transform.forward.y, precisionDigits) : true;
         bool faceZ = axisZ ? Math.Round(m_direction.z, precisionDigits) == Math.Round(transform.forward.z, precisionDigits) : true;
         return faceX && faceY && faceZ;
     }
-    
+
     void RotateAgent()
     {
         var rotation = Quaternion.LookRotation(m_direction, Vector3.up);
@@ -166,4 +165,6 @@ public class NavigationAgent : MonoBehaviour
         MovingOnly, // no rotation when stopped
         RotateBeforeMoving
     }
+
+    public enum RotationPrecision { High = 0, Medium = 1, Low = 2, VeryLow = 3 }
 }
