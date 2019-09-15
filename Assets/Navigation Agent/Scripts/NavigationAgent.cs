@@ -102,8 +102,15 @@ public class NavigationAgent : MonoBehaviour
     {
         while (true)
         {
-            CalculatePath();
-            yield return new WaitForSecondsRealtime(repathDelay);
+            if(m_enabled)
+            {
+                CalculatePath();
+                yield return new WaitForSecondsRealtime(repathDelay);
+            }
+            else
+            {
+                yield return new WaitForEndOfFrame();
+            }
         }
     }
 
