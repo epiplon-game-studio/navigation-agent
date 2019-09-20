@@ -14,9 +14,9 @@ namespace vnc.AI.Editor
         SerializedProperty rotationStyle;
         SerializedProperty rotationPrecision;
         SerializedProperty repathDelay;
-
-        static bool advancedOptions;
-
+        SerializedProperty navmeshAreas;
+        SerializedProperty advancedOptions;
+        
         GUIStyle debugStyle;
 
         private void OnEnable()
@@ -30,6 +30,8 @@ namespace vnc.AI.Editor
             rotationStyle = serializedObject.FindProperty("rotationStyle");
             rotationPrecision = serializedObject.FindProperty("rotationPrecision");
             repathDelay = serializedObject.FindProperty("repathDelay");
+            navmeshAreas = serializedObject.FindProperty("navmeshAreas");
+            advancedOptions = serializedObject.FindProperty("advancedOptions");
 
             debugStyle = new GUIStyle();
             var debugTexture = new Texture2D(1, 1);
@@ -71,13 +73,14 @@ namespace vnc.AI.Editor
             EditorGUILayout.PropertyField(rotationStyle);
             #endregion
 
-            advancedOptions = EditorGUILayout.Foldout(advancedOptions, "Advanced");
-            if (advancedOptions)
+            advancedOptions.boolValue = EditorGUILayout.Foldout(advancedOptions.boolValue, "Advanced");
+            if (advancedOptions.boolValue)
             {
                 EditorGUI.PropertyField(FoldRect(), rotationPrecision);
 
                 var repathContent = new GUIContent("Repath Delay (seconds)", "Value in seconds");
                 repathDelay.floatValue = EditorGUI.Slider(FoldRect(), repathContent, repathDelay.floatValue, 0.01f, 9f);
+                navmeshAreas.intValue = EditorGUI.MaskField(FoldRect(), "Area Mask",  navmeshAreas.intValue, GameObjectUtility.GetNavMeshAreaNames());
 
                 EditorGUILayout.Space();
             }

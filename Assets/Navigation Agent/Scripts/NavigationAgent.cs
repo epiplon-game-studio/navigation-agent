@@ -30,6 +30,7 @@ public class NavigationAgent : MonoBehaviour
     // ADVANCED
     public RotationPrecision rotationPrecision = RotationPrecision.High;
     public float repathDelay = 0.1f;
+    public int navmeshAreas;
 
     public bool IsStopped
     {
@@ -42,6 +43,7 @@ public class NavigationAgent : MonoBehaviour
     NavMeshPath navMeshPath;
     int pathIndex = 0;
     Vector3 m_direction;
+    [SerializeField] bool advancedOptions;
 
     void Start()
     {
@@ -116,7 +118,7 @@ public class NavigationAgent : MonoBehaviour
 
     public void CalculatePath()
     {
-        if (NavMesh.CalculatePath(transform.position, Target, NavMesh.AllAreas, navMeshPath))
+        if (NavMesh.CalculatePath(transform.position, Target, navmeshAreas, navMeshPath))
         {
             pathIndex = 0;
         }
