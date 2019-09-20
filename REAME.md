@@ -3,7 +3,7 @@
 Just add the `Navigation Agent` component into your character and you're ready to go.
 
 - Requires Unity 2017.2+
-- Requires [Unity NavMeshComponents](https://github.com/Unity-Technologies/NavMeshComponents)
+- Requires [Unity NavMeshComponents](https://github.com/Unity-Technologies/NavMeshComponents), that's included as a submodule into the repository. You can either get it from the official source or [update the submodule with `git`](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 - Make sure to get the right `NavMeshComponents` version for your project.
 - Source code under [MIT License](https://opensource.org/licenses/MIT)
 
