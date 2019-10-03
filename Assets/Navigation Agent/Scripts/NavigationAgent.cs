@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -45,6 +44,9 @@ public class NavigationAgent : MonoBehaviour
     Vector3 m_direction;
     [SerializeField] bool advancedOptions;
 
+    public Vector3 Velocity { get; private set; }
+    public Vector3 AngularVelocity { get; private set; }
+
     void Start()
     {
         navMeshPath = new NavMeshPath();
@@ -65,11 +67,17 @@ public class NavigationAgent : MonoBehaviour
                 {
                     bool isFacingTarget = IsFacingTarget();
                     if (isFacingTarget)
-                        transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                    {
+                        Vector3 nextPosition = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                        Velocity = nextPosition - transform.position;
+                        transform.position = nextPosition;
+                    }
                 }
                 else
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                    Vector3 nextPosition = Vector3.MoveTowards(transform.position, target, m_positionSpeed * Time.deltaTime);
+                    Velocity = nextPosition - transform.position;
+                    transform.position = nextPosition;
                 }
 
                 if (transform.position == target)
@@ -81,6 +89,10 @@ public class NavigationAgent : MonoBehaviour
                     // update the direction while on path
                     m_direction = (target - transform.position).normalized;
                 }
+            }
+            else
+            {
+                Velocity = Vector3.zero;
             }
 
             if (m_direction != Vector3.zero)
@@ -153,8 +165,11 @@ public class NavigationAgent : MonoBehaviour
 
     void RotateAgent()
     {
-        var rotation = Quaternion.LookRotation(m_direction, Vector3.up);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, rotation, m_rotationSpeed * Time.deltaTime);
+        var targetRotation = Quaternion.LookRotation(m_direction, Vector3.up);
+
+        var nextRotation = Quaternion.RotateTowards(transform.rotation, targetRotation, m_rotationSpeed * Time.deltaTime);
+        AngularVelocity = nextRotation.eulerAngles - transform.rotation.eulerAngles;
+        transform.rotation = nextRotation;
     }
 
     private void OnDestroy()
@@ -167,8 +182,18 @@ public class NavigationAgent : MonoBehaviour
     {
         if (navMeshPath != null)
         {
-            Rect r = new Rect(0, 0, 300, 300);
-            GUI.Label(r, "Facing Target: " + IsFacingTarget());
+            Rect r = new Rect(0, 0, 300, 600);
+            GUI.Label(r, "Velocity X: " + Velocity.x);
+            r.y += 30;
+            GUI.Label(r, "Velocity Y: " + Velocity.y);
+            r.y += 30;
+            GUI.Label(r, "Velocity Z: " + Velocity.z);
+            r.y += 60;
+            GUI.Label(r, "Angular Velocity X: " + AngularVelocity.x);
+            r.y += 30;
+            GUI.Label(r, "Angular Velocity Y: " + AngularVelocity.y);
+            r.y += 30;
+            GUI.Label(r, "Angular Velocity Z: " + AngularVelocity.z);
         }
     }
 
