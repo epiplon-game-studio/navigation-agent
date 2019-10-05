@@ -7,6 +7,7 @@ namespace vnc.AI.Samples
     {
         public NavigationAgent navigationAgent;
         public LayerMask hitMask;
+        public bool followMouse = true;
         Camera _camera;
 
         private void Awake()
@@ -22,15 +23,29 @@ namespace vnc.AI.Samples
         Ray ray;
         void SetTarget()
         {
-            if (Input.GetMouseButtonDown(0))
+            if (followMouse)
             {
                 ray = _camera.ScreenPointToRay(Input.mousePosition);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, Mathf.Infinity, hitMask))
                 {
-                    navigationAgent.Target = hit.point;
+                    navigationAgent.SetDestination(hit.point);
                 }
             }
+            else
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    ray = _camera.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hit;
+                    if (Physics.Raycast(ray, out hit, Mathf.Infinity, hitMask))
+                    {
+                        navigationAgent.SetDestination(hit.point);
+                    }
+                }
+            }
+
+
         }
     }
 }
